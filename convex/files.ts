@@ -65,3 +65,20 @@ export const getFiles = query({
       .collect();
   },
 });
+
+export const deleteFile = mutation({
+  args: {
+    fileId: v.id('files'),
+  },
+  async handler(ctx, args) {
+    const identity = await getIdentity(ctx);
+
+    const file = await ctx.db.get(args.fileId);
+
+    if (!file) throw new ConvexError('File does not exist');
+
+    await hasAccessToOrg(ctx, identity.tokenIdentifier, file.orgId);
+
+    await ctx.db.delete(args.fileId);
+  },
+});
