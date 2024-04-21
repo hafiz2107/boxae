@@ -19,10 +19,16 @@ async function hasAccessToOrg(
   return hasAccess;
 }
 
+export const generateUploadUrl = mutation(async (ctx) => {
+  await getIdentity(ctx);
+  return await ctx.storage.generateUploadUrl();
+});
+
 export const createFile = mutation({
   args: {
     name: v.string(),
     orgId: v.string(),
+    fileId: v.id('_storage'),
   },
   async handler(ctx, args) {
     const identity = await getIdentity(ctx);
@@ -31,6 +37,7 @@ export const createFile = mutation({
     await ctx.db.insert('files', {
       name: args.name,
       orgId: args.orgId,
+      fileId: args.fileId,
     });
   },
 });
