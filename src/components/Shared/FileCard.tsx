@@ -124,17 +124,31 @@ const FileCard = ({
           </CardTitle>
         </CardHeader>
 
-        <CardContent>
-          {file.url && file.type === 'image' && (
-            <Image alt={'Preview'} height={100} width={100} src={file.url} />
-          )}
-        </CardContent>
+        <div className="flex flex-col gap-3">
+          <CardContent className="max-h-40 min-h-40 overflow-hidden flex justify-center items-center">
+            {file.url && file.type === 'image' && (
+              <Image alt={'Preview'} height={100} width={200} src={file.url} />
+            )}
+            {file.url && file.type === 'csv' && (
+              <GanttChart className="w-20 h-20" />
+            )}
+            {file.url && file.type === 'pdf' && (
+              <FileText className="w-20 h-20" />
+            )}
+          </CardContent>
 
-        <CardFooter>
-          <Button size={'sm'} variant="ghost">
-            <ArrowDownToLine size={15} />
-          </Button>
-        </CardFooter>
+          <CardFooter className="flex justify-center">
+            <Button
+              size={'sm'}
+              variant="ghost"
+              onClick={() => {
+                file.url && window.open(file.url, '_blank');
+              }}
+            >
+              <ArrowDownToLine size={15} />
+            </Button>
+          </CardFooter>
+        </div>
       </Card>
     </div>
   );
