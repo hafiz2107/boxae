@@ -17,6 +17,7 @@ export default defineSchema({
     fileId: v.id('_storage'),
     storageId: v.id('_storage'),
     shouldDelete: v.optional(v.boolean()),
+    authorId: v.id('users'),
   })
     .searchIndex('search_title', {
       searchField: 'name',
@@ -33,6 +34,8 @@ export default defineSchema({
         role: userRoles,
       })
     ),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
   }).index('by_tokenIdentifier', ['tokenIdentifier']),
 
   favorites: defineTable({

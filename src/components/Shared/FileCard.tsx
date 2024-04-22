@@ -7,9 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from '../ui/card';
-import { Button } from '../ui/button';
+
 import {
-  ArrowDownToLine,
+  Download,
   EllipsisVertical,
   FileImage,
   FileText,
@@ -36,19 +36,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useToast } from '../ui/use-toast';
 import Image from 'next/image';
 import { Protect } from '@clerk/nextjs';
 import { ConvexError } from 'convex/values';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { formatRelative } from 'date-fns';
+import { enGB } from 'date-fns/locale/en-GB';
 
 function FileCardActions({
   fileId,
+  fileUrl,
   isFavourited,
   isMarkedAsDelete,
 }: {
   fileId: Id<'files'>;
+  fileUrl: string;
   isFavourited: boolean;
   isMarkedAsDelete?: boolean;
 }) {
@@ -126,6 +131,14 @@ function FileCardActions({
             {isFavourited && <HeartCrack size={20} />}
             {isFavourited ? 'Remove from Favorites' : 'Add to Favorites'}
           </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="flex gap-4 items-center justify-start"
+            onClick={() => fileUrl && window.open(fileUrl, '_blank')}
+          >
+            <Download size={20} /> Download file
+          </DropdownMenuItem>
+
           <Protect role="org:admin" fallback={<></>}>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -164,11 +177,28 @@ const FileCard = ({
   file: Doc<'files'> & { url: string | null };
   isFavourited: boolean;
 }) => {
+  const user = useQuery(api.users.getUserProfile, {
+    userId: file.authorId,
+  });
+
   const typeIcons = {
     image: <FileImage />,
     pdf: <FileText />,
     csv: <GanttChart />,
   } as Record<Doc<'files'>['type'], ReactNode>;
+
+  const formatRelativeLocale = {
+    lastWeek: "'Last' eeee 'at' hh:mm a",
+    yesterday: "'Yesterday' 'at' hh:mm a",
+    today: "'Today' 'at' hh:mm a",
+    other: "dd.MM.yyyy 'at' hh:mm a",
+  };
+
+  const locale = {
+    ...enGB,
+    formatRelative: (token: any) => (formatRelativeLocale as any)[token],
+  };
+
   return (
     <div>
       <Card>
@@ -176,11 +206,19 @@ const FileCard = ({
           <CardTitle className="flex justify-between">
             <div className="flex gap-2 items-center justify-center text-nowrap overflow-hidden max-w-64">
               <div>{typeIcons[file.type]}</div>
-              <p className="text-sm">{file.name}</p>
+              <div>
+                <p className="text-sm">{file.name}</p>
+                <p className="text-xs text-gray-400">
+                  {formatRelative(new Date(file._creationTime), new Date(), {
+                    locale,
+                  })}
+                </p>
+              </div>
             </div>
             <FileCardActions
               key={file._id}
               fileId={file._id}
+              fileUrl={file.url!}
               isFavourited={isFavourited}
               isMarkedAsDelete={file.shouldDelete}
             />
@@ -200,16 +238,14 @@ const FileCard = ({
             )}
           </CardContent>
 
-          <CardFooter className="flex justify-center">
-            <Button
-              size={'sm'}
-              variant="ghost"
-              onClick={() => {
-                file.url && window.open(file.url, '_blank');
-              }}
-            >
-              <ArrowDownToLine size={15} />
-            </Button>
+          <CardFooter className="flex w-full justify-between">
+            <div className="flex items-center gap-2">
+              <Avatar className="w-5 h-5">
+                <AvatarImage src={user?.image} />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+              <p className="text-sm text-gray-500">{user?.name}</p>
+            </div>
           </CardFooter>
         </div>
       </Card>
