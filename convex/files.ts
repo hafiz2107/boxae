@@ -66,7 +66,8 @@ export const getFiles = query({
   args: {
     orgId: v.string(),
     query: v.optional(v.string()),
-    fav: v.optional(v.boolean()),
+    favoriteOnly: v.optional(v.boolean()),
+    deletedOnly: v.optional(v.boolean()),
   },
   async handler(ctx, args) {
     const hasAccess = await hasAccessToOrg(ctx, args.orgId, true);
@@ -87,7 +88,7 @@ export const getFiles = query({
           .withIndex('by_orgId', (q) => q.eq('orgId', args.orgId))
           .collect();
 
-    if (args?.fav) {
+    if (args?.favoriteOnly) {
       const favFiles = await ctx.db
         .query('favorites')
         .withIndex('by_userId_orgId_fileId', (q) =>
@@ -98,6 +99,12 @@ export const getFiles = query({
       files = files.filter((file) =>
         favFiles.some((fav) => fav.fileId === file._id)
       );
+    }
+
+    if (args?.deletedOnly) {
+      files = files.filter((file) => file.shouldDelete);
+    } else {
+      files = files.filter((file) => !file.shouldDelete);
     }
 
     const filesWithUrl = await Promise.all(
@@ -124,7 +131,31 @@ export const deleteFile = mutation({
         ?.role === 'admin';
 
     if (!isAdmin) throw new ConvexError('You are not permitted to delete');
-    return await ctx.db.delete(args.fileId);
+
+    return await ctx.db.patch(args.fileId, {
+      shouldDelete: true,
+    });
+  },
+});
+
+export const restoreFile = mutation({
+  args: {
+    fileId: v.id('files'),
+  },
+  async handler(ctx, args) {
+    const hasAccess = await hasAccessToFile(ctx, args.fileId);
+    if (!hasAccess) {
+      return null;
+    }
+    const isAdmin =
+      hasAccess.user.orgIds.find((org) => org.orgId === hasAccess.file.orgId)
+        ?.role === 'admin';
+
+    if (!isAdmin) throw new ConvexError('You are not permitted to delete');
+
+    return await ctx.db.patch(args.fileId, {
+      shouldDelete: false,
+    });
   },
 });
 

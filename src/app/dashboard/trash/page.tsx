@@ -1,9 +1,8 @@
-import React from 'react'
+import FileBrowser from '@/components/Shared/FileBrowser';
+import React from 'react';
 
 const TrashPage = () => {
-  return (
-    <div>TrashPage</div>
-  )
-}
+  return <FileBrowser deletedOnly />;
+};
 
-export default TrashPage
+export default TrashPage;

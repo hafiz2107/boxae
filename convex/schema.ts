@@ -16,6 +16,7 @@ export default defineSchema({
     type: fileTypes,
     fileId: v.id('_storage'),
     storageId: v.id('_storage'),
+    shouldDelete: v.optional(v.boolean()),
   })
     .searchIndex('search_title', {
       searchField: 'name',

@@ -17,6 +17,7 @@ import {
   Heart,
   HeartCrack,
   Trash2,
+  UndoIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -45,14 +46,17 @@ import { ConvexError } from 'convex/values';
 function FileCardActions({
   fileId,
   isFavourited,
+  isMarkedAsDelete,
 }: {
   fileId: Id<'files'>;
   isFavourited: boolean;
+  isMarkedAsDelete?: boolean;
 }) {
   const [cnfrmDialogue, setConfrmDialogue] = useState(false);
   const { toast } = useToast();
   const deleteFile = useMutation(api.files.deleteFile);
   const toggleFav = useMutation(api.files.toggleFav);
+  const restoreFile = useMutation(api.files.restoreFile);
 
   const handleFileDelete = async () => {
     try {
@@ -62,8 +66,8 @@ function FileCardActions({
 
       toast({
         variant: 'success',
-        title: 'File deleted',
-        description: 'Successfully deleted file',
+        title: 'File have been moved to trash',
+        description: 'Your file will be deleted soon',
       });
     } catch (error) {
       const errorMessage =
@@ -83,8 +87,8 @@ function FileCardActions({
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              file and remove your data from our servers.
+              This action will move your file to the trash and will be delete
+              after 30 days.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -125,11 +129,26 @@ function FileCardActions({
           <Protect role="org:admin" fallback={<></>}>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              className="flex gap-4 text-red-600 items-center justify-start"
-              onClick={() => setConfrmDialogue(true)}
+              className="flex justify-start"
+              onClick={() => {
+                if (isMarkedAsDelete) {
+                  restoreFile({ fileId: fileId });
+                } else {
+                  setConfrmDialogue(true);
+                }
+              }}
             >
-              <Trash2 size={20} />
-              Delete
+              {isMarkedAsDelete ? (
+                <div className="flex gap-4 text-green-600 items-center">
+                  <UndoIcon size={20} />
+                  Restore item
+                </div>
+              ) : (
+                <div className="flex gap-4 text-red-600 items-center">
+                  <Trash2 size={20} />
+                  Move to trash
+                </div>
+              )}
             </DropdownMenuItem>
           </Protect>
         </DropdownMenuContent>
@@ -163,6 +182,7 @@ const FileCard = ({
               key={file._id}
               fileId={file._id}
               isFavourited={isFavourited}
+              isMarkedAsDelete={file.shouldDelete}
             />
           </CardTitle>
         </CardHeader>

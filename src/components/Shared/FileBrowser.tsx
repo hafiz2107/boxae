@@ -9,7 +9,13 @@ import { Loader2 } from 'lucide-react';
 import TopSection from '../Homepage/TopSection';
 import FilesListingSection from '../Homepage/FilesListingSection';
 
-const FileBrowser = ({ fav }: { fav?: boolean }) => {
+const FileBrowser = ({
+  favoriteOnly,
+  deletedOnly,
+}: {
+  favoriteOnly?: boolean;
+  deletedOnly?: boolean;
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const organization = useOrganization();
   const user = useUser();
@@ -26,7 +32,7 @@ const FileBrowser = ({ fav }: { fav?: boolean }) => {
 
   const files: Array<Doc<'files'> & { url: string | null }> = useQuery(
     api.files.getFiles,
-    orgId ? { orgId, query: searchQuery, fav } : 'skip'
+    orgId ? { orgId, query: searchQuery, favoriteOnly, deletedOnly } : 'skip'
   )!;
 
   const [showTopSection, setShowTopSection] = useState(false);
@@ -52,7 +58,7 @@ const FileBrowser = ({ fav }: { fav?: boolean }) => {
             <div className="flex flex-col gap-11">
               {showTopSection && (
                 <TopSection
-                  fav={fav}
+                  favoriteOnly={favoriteOnly}
                   orgId={orgId}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
@@ -60,7 +66,7 @@ const FileBrowser = ({ fav }: { fav?: boolean }) => {
               )}
               {favorites && (
                 <FilesListingSection
-                  fav={fav}
+                  favoriteOnly={favoriteOnly}
                   favorites={favorites}
                   files={files}
                   orgId={orgId}

@@ -7,19 +7,19 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 
 const FilesListingSection = ({
-  fav,
+  favoriteOnly,
   favorites,
   files,
   orgId,
 }: {
-  fav?: boolean;
+  favoriteOnly?: boolean;
   favorites: Doc<'favorites'>[];
   files: (Doc<'files'> & { url: string | null })[];
   orgId: string;
 }) => {
   return (
     <div>
-      {fav && files && !files.length && (
+      {favoriteOnly && files && !files.length && (
         <div className="flex flex-col gap-7 w-full items-center mt-52">
           <Image
             alt="No files to list"
@@ -38,7 +38,7 @@ const FilesListingSection = ({
         </div>
       )}
 
-      {!fav && files && !files.length && (
+      {!favoriteOnly && files && !files.length && (
         <div className="flex flex-col gap-7 w-full items-center mt-52">
           <Image
             alt="No files to list"
