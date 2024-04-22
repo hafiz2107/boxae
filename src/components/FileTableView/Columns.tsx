@@ -75,6 +75,7 @@ export const columns: ColumnDef<
       <FileCardActions
         fileId={row.original._id}
         fileUrl={row.original.url!}
+        userId={row.original.authorId}
         isFavourited={row.original.isFavorited}
         isMarkedAsDelete={row.original.shouldDelete}
       />

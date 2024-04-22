@@ -109,6 +109,7 @@ const FileCard = ({
               key={file._id}
               fileId={file._id}
               fileUrl={file.url!}
+              userId={file.authorId}
               isFavourited={file.isFavorited}
               isMarkedAsDelete={file.shouldDelete}
             />

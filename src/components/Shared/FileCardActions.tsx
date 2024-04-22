@@ -1,21 +1,45 @@
 import { useState } from 'react';
 import { Id } from '../../../convex/_generated/dataModel';
 import { useToast } from '../ui/use-toast';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { ConvexError } from 'convex/values';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { Download, EllipsisVerticalIcon, Heart, HeartCrack, Trash2, UndoIcon } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import {
+  Download,
+  EllipsisVerticalIcon,
+  Heart,
+  HeartCrack,
+  Trash2,
+  UndoIcon,
+} from 'lucide-react';
 import { Protect } from '@clerk/nextjs';
 
 function FileCardActions({
   fileId,
+  userId,
   fileUrl,
   isFavourited,
   isMarkedAsDelete,
 }: {
   fileId: Id<'files'>;
+  userId: Id<'users'>;
   fileUrl: string;
   isFavourited: boolean;
   isMarkedAsDelete?: boolean;
@@ -25,6 +49,7 @@ function FileCardActions({
   const deleteFile = useMutation(api.files.deleteFile);
   const toggleFav = useMutation(api.files.toggleFav);
   const restoreFile = useMutation(api.files.restoreFile);
+  const user = useQuery(api.users.getMe);
 
   const handleFileDelete = async () => {
     try {
@@ -44,6 +69,22 @@ function FileCardActions({
       toast({
         variant: 'destructive',
         title: 'Failed to delete file',
+        description: errorMessage,
+      });
+    }
+  };
+
+  const handleRestoreFile = async (fileId: Id<'files'>) => {
+    try {
+      await restoreFile({ fileId: fileId });
+    } catch (error) {
+      console.log('eror -> ', error);
+      const errorMessage =
+        error instanceof ConvexError ? error.data : 'Unexpected error occurred';
+
+      toast({
+        variant: 'destructive',
+        title: 'Failed to restore file',
         description: errorMessage,
       });
     }
@@ -102,13 +143,20 @@ function FileCardActions({
             <Download size={20} /> Download file
           </DropdownMenuItem>
 
-          <Protect role="org:admin" fallback={<></>}>
+          <Protect
+            condition={(check) =>
+              check({
+                role: 'org:admin',
+              }) || userId === user?._id
+            }
+            fallback={<></>}
+          >
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="flex justify-start"
               onClick={() => {
                 if (isMarkedAsDelete) {
-                  restoreFile({ fileId: fileId });
+                  handleRestoreFile(fileId);
                 } else {
                   setConfrmDialogue(true);
                 }

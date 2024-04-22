@@ -42,6 +42,24 @@ async function hasAccessToFile(
   return { ...orgAccess, file };
 }
 
+const canDeleteOrRestoreFile = async (
+  ctx: QueryCtx | MutationCtx,
+  fileId: Id<'files'>
+) => {
+  const hasAccess = await hasAccessToFile(ctx, fileId);
+  if (!hasAccess) {
+    return null;
+  }
+  const canDelete =
+    hasAccess.file.authorId === hasAccess.user._id ||
+    hasAccess.user.orgIds.find((org) => org.orgId === hasAccess.file.orgId)
+      ?.role === 'admin';
+
+  if (!canDelete) throw new ConvexError("You don't have enough permission");
+
+  return canDelete;
+};
+
 export const generateUploadUrl = mutation(async (ctx) => {
   await getIdentity(ctx);
   return await ctx.storage.generateUploadUrl();
@@ -153,15 +171,7 @@ export const deleteFile = mutation({
     fileId: v.id('files'),
   },
   async handler(ctx, args) {
-    const hasAccess = await hasAccessToFile(ctx, args.fileId);
-    if (!hasAccess) {
-      return null;
-    }
-    const isAdmin =
-      hasAccess.user.orgIds.find((org) => org.orgId === hasAccess.file.orgId)
-        ?.role === 'admin';
-
-    if (!isAdmin) throw new ConvexError('You are not permitted to delete');
+    await canDeleteOrRestoreFile(ctx, args.fileId);
 
     return await ctx.db.patch(args.fileId, {
       shouldDelete: true,
@@ -174,16 +184,7 @@ export const restoreFile = mutation({
     fileId: v.id('files'),
   },
   async handler(ctx, args) {
-    const hasAccess = await hasAccessToFile(ctx, args.fileId);
-    if (!hasAccess) {
-      return null;
-    }
-    const isAdmin =
-      hasAccess.user.orgIds.find((org) => org.orgId === hasAccess.file.orgId)
-        ?.role === 'admin';
-
-    if (!isAdmin) throw new ConvexError('You are not permitted to delete');
-
+    await canDeleteOrRestoreFile(ctx, args.fileId);
     return await ctx.db.patch(args.fileId, {
       shouldDelete: false,
     });
