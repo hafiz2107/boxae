@@ -77,6 +77,7 @@ export const getFiles = query({
     query: v.optional(v.string()),
     favoriteOnly: v.optional(v.boolean()),
     deletedOnly: v.optional(v.boolean()),
+    type: v.optional(fileTypes),
   },
   async handler(ctx, args) {
     const hasAccess = await hasAccessToOrg(ctx, args.orgId, true);
@@ -96,6 +97,10 @@ export const getFiles = query({
           .query('files')
           .withIndex('by_orgId', (q) => q.eq('orgId', args.orgId))
           .collect();
+
+    if (args.type) {
+      files = files.filter((file) => file.type === args.type);
+    }
 
     if (args?.favoriteOnly) {
       const favFiles = await ctx.db

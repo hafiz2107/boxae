@@ -4,16 +4,18 @@ import FileUploadButton from '@/components/Shared/FileUploadButton';
 import SearchBar from '../Shared/SearchBar';
 
 const TopSection = ({
-  favoriteOnly,
-  deletedOnly,
   orgId,
+  isEmpty,
+  deletedOnly,
   searchQuery,
+  favoriteOnly,
   setSearchQuery,
 }: {
-  favoriteOnly?: boolean;
-  deletedOnly?: boolean;
   orgId: string;
+  isEmpty: boolean;
   searchQuery: string;
+  deletedOnly?: boolean;
+  favoriteOnly?: boolean;
   setSearchQuery: Dispatch<React.SetStateAction<string>>;
 }) => {
   return (
@@ -21,8 +23,15 @@ const TopSection = ({
       <h1 className="text-4xl font-bold">
         {favoriteOnly ? 'Favorites' : deletedOnly ? 'Trash' : 'Your Files'}
       </h1>
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <FileUploadButton orgId={orgId} />
+      {!isEmpty && (
+        <>
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+          <FileUploadButton orgId={orgId} />
+        </>
+      )}
     </div>
   );
 };

@@ -20,6 +20,9 @@ const FileBrowser = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [defaultView, setDefaultView] = useState<'grid' | 'table'>('grid');
+  const [fileTypeFilter, setFileTypeFilter] = useState<
+    'all' | 'image' | 'csv' | 'pdf'
+  >('all');
   const organization = useOrganization();
   const user = useUser();
 
@@ -35,10 +38,18 @@ const FileBrowser = ({
 
   const files: Array<Doc<'files'> & { url: string | null }> = useQuery(
     api.files.getFiles,
-    orgId ? { orgId, query: searchQuery, favoriteOnly, deletedOnly } : 'skip'
+    orgId
+      ? {
+          orgId,
+          query: searchQuery,
+          favoriteOnly,
+          deletedOnly,
+          type: fileTypeFilter === 'all' ? undefined : fileTypeFilter,
+        }
+      : 'skip'
   )!;
 
-  const [showTopSection, setShowTopSection] = useState(false);
+  // const [showTopSection, setShowTopSection] = useState(false);
 
   const isLoading = files === undefined;
 
@@ -50,11 +61,11 @@ const FileBrowser = ({
       }))) ??
     [];
 
-  useEffect(() => {
-    if (!isLoading) {
-      setShowTopSection(searchQuery ? true : Boolean(files && files.length));
-    }
-  }, [files, isLoading, searchQuery]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     setShowTopSection(searchQuery ? true : Boolean(files && files.length));
+  //   }
+  // }, [files, isLoading, searchQuery]);
 
   return (
     <SignedIn>
@@ -67,23 +78,24 @@ const FileBrowser = ({
         <div className="w-full">
           {orgId && (
             <div className="flex flex-col gap-11">
-              {showTopSection && (
-                <TopSection
-                  favoriteOnly={favoriteOnly}
-                  deletedOnly={deletedOnly}
-                  orgId={orgId}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                />
-              )}
+              <TopSection
+                orgId={orgId}
+                deletedOnly={deletedOnly}
+                searchQuery={searchQuery}
+                favoriteOnly={favoriteOnly}
+                setSearchQuery={setSearchQuery}
+                isEmpty={files && !files.length}
+              />
 
               <FilesListingSection
-                setView={setDefaultView}
-                view={defaultView}
-                favoriteOnly={favoriteOnly}
-                deletedOnly={deletedOnly}
-                files={modifiedFiles}
                 orgId={orgId}
+                view={defaultView}
+                files={modifiedFiles}
+                setView={setDefaultView}
+                deletedOnly={deletedOnly}
+                favoriteOnly={favoriteOnly}
+                fileTypeFilter={fileTypeFilter}
+                setFileTypeFilter={setFileTypeFilter}
               />
             </div>
           )}
