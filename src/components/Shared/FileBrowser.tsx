@@ -8,6 +8,8 @@ import { Doc } from '../../../convex/_generated/dataModel';
 import { Loader2 } from 'lucide-react';
 import TopSection from '../Homepage/TopSection';
 import FilesListingSection from '../Homepage/FilesListingSection';
+import { DataTable } from '../FileTableView/TableView';
+import { columns } from '../FileTableView/Columns';
 
 const FileBrowser = ({
   favoriteOnly,
@@ -17,6 +19,7 @@ const FileBrowser = ({
   deletedOnly?: boolean;
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [defaultView, setDefaultView] = useState<'grid' | 'table'>('grid');
   const organization = useOrganization();
   const user = useUser();
 
@@ -39,6 +42,14 @@ const FileBrowser = ({
 
   const isLoading = files === undefined;
 
+  const modifiedFiles =
+    (files &&
+      files.map((file) => ({
+        ...file,
+        isFavorited: (favorites ?? []).some((fav) => fav.fileId === file._id),
+      }))) ??
+    [];
+
   useEffect(() => {
     if (!isLoading) {
       setShowTopSection(searchQuery ? true : Boolean(files && files.length));
@@ -59,6 +70,7 @@ const FileBrowser = ({
               {showTopSection && (
                 <TopSection
                   favoriteOnly={favoriteOnly}
+                  deletedOnly={deletedOnly}
                   orgId={orgId}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
@@ -66,10 +78,11 @@ const FileBrowser = ({
               )}
 
               <FilesListingSection
+                setView={setDefaultView}
+                view={defaultView}
                 favoriteOnly={favoriteOnly}
                 deletedOnly={deletedOnly}
-                favorites={favorites ?? []}
-                files={files}
+                files={modifiedFiles}
                 orgId={orgId}
               />
             </div>

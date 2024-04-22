@@ -5,11 +5,13 @@ import SearchBar from '../Shared/SearchBar';
 
 const TopSection = ({
   favoriteOnly,
+  deletedOnly,
   orgId,
   searchQuery,
   setSearchQuery,
 }: {
   favoriteOnly?: boolean;
+  deletedOnly?: boolean;
   orgId: string;
   searchQuery: string;
   setSearchQuery: Dispatch<React.SetStateAction<string>>;
@@ -17,7 +19,7 @@ const TopSection = ({
   return (
     <div className="flex justify-between items-center">
       <h1 className="text-4xl font-bold">
-        {favoriteOnly ? 'Favorites' : 'Your Files'}
+        {favoriteOnly ? 'Favorites' : deletedOnly ? 'Trash' : 'Your Files'}
       </h1>
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <FileUploadButton orgId={orgId} />
