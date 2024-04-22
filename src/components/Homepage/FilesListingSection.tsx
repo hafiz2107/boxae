@@ -8,18 +8,39 @@ import { Button } from '../ui/button';
 
 const FilesListingSection = ({
   favoriteOnly,
+  deletedOnly,
   favorites,
   files,
   orgId,
 }: {
   favoriteOnly?: boolean;
+  deletedOnly?: boolean;
   favorites: Doc<'favorites'>[];
   files: (Doc<'files'> & { url: string | null })[];
   orgId: string;
 }) => {
   return (
     <div>
-      {favoriteOnly && files && !files.length && (
+      {deletedOnly && !favoriteOnly && files && !files.length && (
+        <div className="flex flex-col gap-7 w-full items-center mt-52">
+          <Image
+            alt="No files in trash"
+            width={300}
+            height={300}
+            src="/empty-trash.svg"
+          />
+          <div className="text-1xl">
+            You have nothing on your trash, Go ahead explore you files
+          </div>
+          <div>
+            <Link href="/dashboard/files">
+              <Button>Show all files</Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {favoriteOnly && !deletedOnly && files && !files.length && (
         <div className="flex flex-col gap-7 w-full items-center mt-52">
           <Image
             alt="No files to list"
@@ -38,7 +59,7 @@ const FilesListingSection = ({
         </div>
       )}
 
-      {!favoriteOnly && files && !files.length && (
+      {!deletedOnly && !favoriteOnly && files && !files.length && (
         <div className="flex flex-col gap-7 w-full items-center mt-52">
           <Image
             alt="No files to list"

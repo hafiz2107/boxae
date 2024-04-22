@@ -22,7 +22,8 @@ export default defineSchema({
       searchField: 'name',
       filterFields: ['orgId'],
     })
-    .index('by_orgId', ['orgId']),
+    .index('by_orgId', ['orgId'])
+    .index('by_shouldDelete', ['shouldDelete']),
 
   users: defineTable({
     tokenIdentifier: v.string(),

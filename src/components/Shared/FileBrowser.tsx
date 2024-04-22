@@ -64,14 +64,14 @@ const FileBrowser = ({
                   setSearchQuery={setSearchQuery}
                 />
               )}
-              {favorites && (
-                <FilesListingSection
-                  favoriteOnly={favoriteOnly}
-                  favorites={favorites}
-                  files={files}
-                  orgId={orgId}
-                />
-              )}
+
+              <FilesListingSection
+                favoriteOnly={favoriteOnly}
+                deletedOnly={deletedOnly}
+                favorites={favorites ?? []}
+                files={files}
+                orgId={orgId}
+              />
             </div>
           )}
         </div>
