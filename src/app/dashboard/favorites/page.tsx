@@ -1,7 +1,8 @@
+import FileBrowser from '@/components/Shared/FileBrowser';
 import React from 'react';
 
 const FavoritesPage = () => {
-  return <div>Favs</div>;
+  return <FileBrowser fav={true} />;
 };
 
 export default FavoritesPage;

@@ -2,6 +2,7 @@ import { ConvexError, v } from 'convex/values';
 import { MutationCtx, QueryCtx, mutation, query } from './_generated/server';
 import { getIdentity, getUser } from './users';
 import { fileTypes } from './schema';
+import { UserIdentity } from 'convex/server';
 
 async function hasAccessToOrg(
   ctx: QueryCtx | MutationCtx,
@@ -51,6 +52,7 @@ export const getFiles = query({
   args: {
     orgId: v.string(),
     query: v.optional(v.string()),
+    fav: v.optional(v.boolean()),
   },
   async handler(ctx, args) {
     const identity = await getIdentity(ctx);
@@ -65,7 +67,7 @@ export const getFiles = query({
       return hasAccess;
     }
 
-    const files = args?.query
+    let files = args?.query
       ? await ctx.db
           .query('files')
           .withSearchIndex('search_title', (q) =>
@@ -76,6 +78,19 @@ export const getFiles = query({
           .query('files')
           .withIndex('by_orgId', (q) => q.eq('orgId', args.orgId))
           .collect();
+
+    if (args?.fav) {
+      const user = await getUser(ctx, identity.tokenIdentifier);
+
+      const favFiles = await ctx.db
+        .query('favorites')
+        .withIndex('by_userId_orgId_fileId', (q) => q.eq('userId', user?._id))
+        .collect();
+
+      files = files.filter((file) =>
+        favFiles.some((fav) => fav.fileId === file._id)
+      );
+    }
 
     const filesWithUrl = await Promise.all(
       files.map(async (file) => ({
@@ -101,5 +116,36 @@ export const deleteFile = mutation({
     await hasAccessToOrg(ctx, identity.tokenIdentifier, file.orgId);
 
     return await ctx.db.delete(args.fileId);
+  },
+});
+
+export const toggleFav = mutation({
+  args: {
+    fileId: v.id('files'),
+  },
+  async handler(ctx, args) {
+    const identity = await getIdentity(ctx);
+    const file = await ctx.db.get(args.fileId);
+
+    if (!file) throw new ConvexError('File does not exist');
+    await hasAccessToOrg(ctx, identity.tokenIdentifier, file.orgId);
+
+    const user = await getUser(ctx, identity.tokenIdentifier);
+    const favs = await ctx.db
+      .query('favorites')
+      .withIndex('by_userId_orgId_fileId', (q) =>
+        q.eq('userId', user?._id).eq('orgId', file.orgId).eq('fileId', file._id)
+      )
+      .first();
+
+    if (!favs) {
+      await ctx.db.insert('favorites', {
+        fileId: file._id,
+        orgId: file.orgId,
+        userId: user._id,
+      });
+    } else {
+      await ctx.db.delete(favs._id);
+    }
   },
 });

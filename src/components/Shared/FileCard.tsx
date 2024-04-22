@@ -14,12 +14,14 @@ import {
   FileImage,
   FileText,
   GanttChart,
+  Heart,
   Trash2,
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import {
@@ -41,6 +43,7 @@ function FileCardActions({ fileId }: { fileId: Id<'files'> }) {
   const [cnfrmDialogue, setConfrmDialogue] = useState(false);
   const { toast } = useToast();
   const deleteFile = useMutation(api.files.deleteFile);
+  const toggleFav = useMutation(api.files.toggleFav);
 
   const handleFileDelete = async () => {
     try {
@@ -90,10 +93,23 @@ function FileCardActions({ fileId }: { fileId: Id<'files'> }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
-            className="flex gap-4 text-red-600 items-center justify-center"
+            className="flex gap-4 items-center justify-start"
+            onClick={() =>
+              toggleFav({
+                fileId: fileId,
+              })
+            }
+          >
+            <Heart size={20} /> Favorite
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="flex gap-4 text-red-600 items-center justify-start"
             onClick={() => setConfrmDialogue(true)}
           >
-            Delete <Trash2 />
+            <Trash2 size={20} />
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

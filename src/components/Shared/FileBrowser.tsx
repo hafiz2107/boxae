@@ -1,18 +1,15 @@
 'use client';
 
 import { SignedIn, useOrganization, useUser } from '@clerk/nextjs';
-import React, { useEffect, useState } from 'react';
-import TopSection from './TopSection';
-import FilesListingSection from './FilesListingSection';
 import { useQuery } from 'convex/react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../../../convex/_generated/api';
-import { FileIcon, Heart, Loader2, Trash2 } from 'lucide-react';
 import { Doc } from '../../../convex/_generated/dataModel';
-import { Button } from '../ui/button';
-import { Separator } from '@/components/ui/separator';
-import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+import TopSection from '../Homepage/TopSection';
+import FilesListingSection from '../Homepage/FilesListingSection';
 
-const Homepage = () => {
+const FileBrowser = ({ fav }: { fav?: boolean }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const organization = useOrganization();
   const user = useUser();
@@ -23,7 +20,7 @@ const Homepage = () => {
 
   const files: Array<Doc<'files'> & { url: string | null }> = useQuery(
     api.files.getFiles,
-    orgId ? { orgId, query: searchQuery } : 'skip'
+    orgId ? { orgId, query: searchQuery, fav } : 'skip'
   )!;
 
   const [showTopSection, setShowTopSection] = useState(false);
@@ -53,7 +50,7 @@ const Homepage = () => {
                 setSearchQuery={setSearchQuery}
               />
             )}
-            {<FilesListingSection files={files} orgId={orgId} />}
+            <FilesListingSection files={files} orgId={orgId} />
           </div>
         )}
       </SignedIn>
@@ -61,4 +58,4 @@ const Homepage = () => {
   );
 };
 
-export default Homepage;
+export default FileBrowser;
