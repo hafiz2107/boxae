@@ -39,12 +39,13 @@ const FileBrowser = ({ fav }: { fav?: boolean }) => {
       <Loader2 className="h-24 w-24 animate-spin text-gray-600" />
     </div>
   ) : (
-    <div>
+    <div className="w-full">
       <SignedIn>
         {orgId && (
           <div className="flex flex-col gap-11">
             {showTopSection && (
               <TopSection
+                fav={fav}
                 orgId={orgId}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}

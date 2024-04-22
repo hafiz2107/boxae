@@ -13,7 +13,7 @@ export default function DashboardLayout({
 }>) {
   return (
     <main className="container pt-12 pl-0 pr-0">
-      <div className="flex">
+      <div className="flex w-full">
         <SideNav />
         {children}
       </div>
