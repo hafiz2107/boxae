@@ -25,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
+import { Doc } from '../../../convex/_generated/dataModel';
 
 const FileUploadButton = ({ orgId }: { orgId: string }) => {
   const [isFileUploadDialogueOpen, setIsFileUploadDialogueOpen] =
@@ -46,19 +47,29 @@ const FileUploadButton = ({ orgId }: { orgId: string }) => {
     try {
       if (!orgId) return;
       const postUrl = await generateUploadUrl();
+      const fileType = values.file[0].type;
 
       const result = await fetch(postUrl, {
         method: 'POST',
-        headers: { 'Content-Type': values.file[0].type },
+        headers: { 'Content-Type': fileType },
         body: values.file[0],
       });
 
       const { storageId } = await result.json();
 
+      const types = {
+        'image/png': 'image',
+        'application/pdf': 'pdf',
+        'text/csv': 'csv',
+        'image/jpeg': 'image',
+      } as Record<string, Doc<'files'>['type']>;
+
       await createFile({
         name: values.file[0].name,
         fileId: storageId,
         orgId: orgId,
+        type: types[fileType],
+        storageId: storageId,
       });
 
       form.reset();

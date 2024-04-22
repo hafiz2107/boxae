@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { Doc, Id } from '../../../convex/_generated/dataModel';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowDownToLine, EllipsisVertical, Trash2 } from 'lucide-react';
+import {
+  ArrowDownToLine,
+  EllipsisVertical,
+  FileImage,
+  FileText,
+  GanttChart,
+  Trash2,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,11 +31,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '../ui/alert-dialog';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useToast } from '../ui/use-toast';
+import Image from 'next/image';
 
 function FileCardActions({ fileId }: { fileId: Id<'files'> }) {
   const [cnfrmDialogue, setConfrmDialogue] = useState(false);
@@ -95,18 +101,33 @@ function FileCardActions({ fileId }: { fileId: Id<'files'> }) {
   );
 }
 
-const FileCard = ({ file }: { file: Doc<'files'> }) => {
+const FileCard = ({
+  file,
+}: {
+  file: Doc<'files'> & { url: string | null };
+}) => {
+  const typeIcons = {
+    image: <FileImage />,
+    pdf: <FileText />,
+    csv: <GanttChart />,
+  } as Record<Doc<'files'>['type'], ReactNode>;
   return (
     <div>
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between">
-            {file.name} <FileCardActions key={file._id} fileId={file._id} />
+            <div className="flex gap-2 text-nowrap max-w-2">
+              <div>{typeIcons[file.type]}</div>
+              <p className="text-sm">{file.name}</p>
+            </div>
+            <FileCardActions key={file._id} fileId={file._id} />
           </CardTitle>
         </CardHeader>
 
         <CardContent>
-          <p>Card Content</p>
+          {file.url && file.type === 'image' && (
+            <Image alt={'Preview'} height={100} width={100} src={file.url} />
+          )}
         </CardContent>
 
         <CardFooter>

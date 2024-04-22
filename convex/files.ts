@@ -1,6 +1,7 @@
 import { ConvexError, v } from 'convex/values';
 import { MutationCtx, QueryCtx, mutation, query } from './_generated/server';
 import { getIdentity, getUser } from './users';
+import { fileTypes } from './schema';
 
 async function hasAccessToOrg(
   ctx: QueryCtx | MutationCtx,
@@ -29,6 +30,8 @@ export const createFile = mutation({
     name: v.string(),
     orgId: v.string(),
     fileId: v.id('_storage'),
+    type: fileTypes,
+    storageId: v.id('_storage'),
   },
   async handler(ctx, args) {
     const identity = await getIdentity(ctx);
@@ -38,6 +41,8 @@ export const createFile = mutation({
       name: args.name,
       orgId: args.orgId,
       fileId: args.fileId,
+      type: args.type,
+      storageId: args.storageId,
     });
   },
 });
@@ -59,10 +64,18 @@ export const getFiles = query({
       return hasAccess;
     }
 
-    return ctx.db
+    const files = await ctx.db
       .query('files')
       .withIndex('by_orgId', (q) => q.eq('orgId', args.orgId))
       .collect();
+
+    const filesWithUrl = await Promise.all(
+      files.map(async (file) => ({
+        ...file,
+        url: await ctx.storage.getUrl(file.fileId),
+      }))
+    );
+    return filesWithUrl;
   },
 });
 
@@ -79,6 +92,6 @@ export const deleteFile = mutation({
 
     await hasAccessToOrg(ctx, identity.tokenIdentifier, file.orgId);
 
-    await ctx.db.delete(args.fileId);
+    return await ctx.db.delete(args.fileId);
   },
 });
