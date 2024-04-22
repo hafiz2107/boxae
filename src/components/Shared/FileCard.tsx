@@ -15,6 +15,7 @@ import {
   FileText,
   GanttChart,
   Heart,
+  HeartCrack,
   Trash2,
 } from 'lucide-react';
 import {
@@ -39,7 +40,13 @@ import { api } from '../../../convex/_generated/api';
 import { useToast } from '../ui/use-toast';
 import Image from 'next/image';
 
-function FileCardActions({ fileId }: { fileId: Id<'files'> }) {
+function FileCardActions({
+  fileId,
+  isFavourited,
+}: {
+  fileId: Id<'files'>;
+  isFavourited: boolean;
+}) {
   const [cnfrmDialogue, setConfrmDialogue] = useState(false);
   const { toast } = useToast();
   const deleteFile = useMutation(api.files.deleteFile);
@@ -100,7 +107,15 @@ function FileCardActions({ fileId }: { fileId: Id<'files'> }) {
               })
             }
           >
-            <Heart size={20} /> Favorite
+            {!isFavourited && (
+              <Heart
+                size={20}
+                fill={isFavourited ? 'red' : 'white'}
+                color={isFavourited ? 'red' : 'black'}
+              />
+            )}
+            {isFavourited && <HeartCrack size={20} />}
+            {isFavourited ? 'Remove from Favorites' : 'Add to Favorites'}
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -119,8 +134,10 @@ function FileCardActions({ fileId }: { fileId: Id<'files'> }) {
 
 const FileCard = ({
   file,
+  isFavourited,
 }: {
   file: Doc<'files'> & { url: string | null };
+  isFavourited: boolean;
 }) => {
   const typeIcons = {
     image: <FileImage />,
@@ -136,7 +153,11 @@ const FileCard = ({
               <div>{typeIcons[file.type]}</div>
               <p className="text-sm">{file.name}</p>
             </div>
-            <FileCardActions key={file._id} fileId={file._id} />
+            <FileCardActions
+              key={file._id}
+              fileId={file._id}
+              isFavourited={isFavourited}
+            />
           </CardTitle>
         </CardHeader>
 

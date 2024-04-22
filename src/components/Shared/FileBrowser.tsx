@@ -13,10 +13,16 @@ const FileBrowser = ({ fav }: { fav?: boolean }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const organization = useOrganization();
   const user = useUser();
+
   let orgId: string | undefined = undefined;
 
   if (user.isLoaded && organization.isLoaded)
     orgId = organization.organization?.id ?? user.user?.id;
+
+  const favorites = useQuery(
+    api.files.getAllFavFiles,
+    orgId ? { orgId } : 'skip'
+  );
 
   const files: Array<Doc<'files'> & { url: string | null }> = useQuery(
     api.files.getFiles,
@@ -51,7 +57,13 @@ const FileBrowser = ({ fav }: { fav?: boolean }) => {
                 setSearchQuery={setSearchQuery}
               />
             )}
-            <FilesListingSection files={files} orgId={orgId} />
+            {favorites && (
+              <FilesListingSection
+                favorites={favorites}
+                files={files}
+                orgId={orgId}
+              />
+            )}
           </div>
         )}
       </SignedIn>

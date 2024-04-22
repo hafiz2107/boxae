@@ -8,10 +8,12 @@ import { Button } from '../ui/button';
 
 const FilesListingSection = ({
   fav,
+  favorites,
   files,
   orgId,
 }: {
   fav?: boolean;
+  favorites: Doc<'favorites'>[];
   files: (Doc<'files'> & { url: string | null })[];
   orgId: string;
 }) => {
@@ -54,7 +56,13 @@ const FilesListingSection = ({
       )}
 
       <div className="grid grid-cols-4 gap-4">
-        {files?.map((file) => <FileCard key={file._id} file={file} />)}
+        {files?.map((file) => (
+          <FileCard
+            key={file._id}
+            file={file}
+            isFavourited={favorites.some((fav) => fav.fileId === file._id)}
+          />
+        ))}
       </div>
     </div>
   );
