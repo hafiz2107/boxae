@@ -6,10 +6,14 @@ import TopSection from './TopSection';
 import FilesListingSection from './FilesListingSection';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { Loader2 } from 'lucide-react';
+import { FileIcon, Heart, Loader2, Trash2 } from 'lucide-react';
 import { Doc } from '../../../convex/_generated/dataModel';
+import { Button } from '../ui/button';
+import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 
 const Homepage = () => {
+  const [searchQuery, setSearchQuery] = useState('');
   const organization = useOrganization();
   const user = useUser();
   let orgId: string | undefined = undefined;
@@ -19,7 +23,7 @@ const Homepage = () => {
 
   const files: Array<Doc<'files'> & { url: string | null }> = useQuery(
     api.files.getFiles,
-    orgId ? { orgId } : 'skip'
+    orgId ? { orgId, query: searchQuery } : 'skip'
   )!;
 
   const [showTopSection, setShowTopSection] = useState(false);
@@ -28,9 +32,9 @@ const Homepage = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      setShowTopSection(Boolean(files && files.length));
+      setShowTopSection(searchQuery ? true : Boolean(files && files.length));
     }
-  }, [files, isLoading]);
+  }, [files, isLoading, searchQuery]);
 
   return isLoading ? (
     <div className="flex flex-col w-full items-center justify-center">
@@ -43,7 +47,11 @@ const Homepage = () => {
         {orgId && (
           <div className="flex flex-col gap-11">
             {showTopSection && (
-              <TopSection onAddingFile={setShowTopSection} orgId={orgId} />
+              <TopSection
+                orgId={orgId}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+              />
             )}
             {<FilesListingSection files={files} orgId={orgId} />}
           </div>

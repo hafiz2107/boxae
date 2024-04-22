@@ -114,9 +114,9 @@ const FileCard = ({
   return (
     <div>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-wrap overflow-hidden">
           <CardTitle className="flex justify-between">
-            <div className="flex gap-2 text-nowrap max-w-2">
+            <div className="flex gap-2 text-nowrap overflow-hidden max-w-64">
               <div>{typeIcons[file.type]}</div>
               <p className="text-sm">{file.name}</p>
             </div>

@@ -50,6 +50,7 @@ export const createFile = mutation({
 export const getFiles = query({
   args: {
     orgId: v.string(),
+    query: v.optional(v.string()),
   },
   async handler(ctx, args) {
     const identity = await getIdentity(ctx);
@@ -64,10 +65,17 @@ export const getFiles = query({
       return hasAccess;
     }
 
-    const files = await ctx.db
-      .query('files')
-      .withIndex('by_orgId', (q) => q.eq('orgId', args.orgId))
-      .collect();
+    const files = args?.query
+      ? await ctx.db
+          .query('files')
+          .withSearchIndex('search_title', (q) =>
+            q.search('name', args?.query!).eq('orgId', args.orgId)
+          )
+          .collect()
+      : await ctx.db
+          .query('files')
+          .withIndex('by_orgId', (q) => q.eq('orgId', args.orgId))
+          .collect();
 
     const filesWithUrl = await Promise.all(
       files.map(async (file) => ({
