@@ -5,6 +5,7 @@ import React from 'react';
 import { Button } from '../ui/button';
 import { FileIcon, Heart, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import clsx from 'clsx';
 
 const SideNav = () => {
   const path = usePathname();
@@ -14,7 +15,9 @@ const SideNav = () => {
         <Link href="/dashboard/files">
           <Button
             variant={path.includes('/dashboard/files') ? 'secondary' : 'link'}
-            className="flex gap-6 w-52 items-center justify-start"
+            className={clsx('flex gap-6 w-52 items-center justify-start', {
+              'font-bold': path.includes('/dashboard/files'),
+            })}
           >
             <FileIcon /> All Files
           </Button>
@@ -25,7 +28,9 @@ const SideNav = () => {
             variant={
               path.includes('/dashboard/favorites') ? 'secondary' : 'link'
             }
-            className="flex gap-6 w-52 items-center justify-start"
+            className={clsx('flex gap-6 w-52 items-center justify-start', {
+              'font-bold': path.includes('/dashboard/favorites'),
+            })}
           >
             <Heart />
             Favorites
@@ -35,7 +40,9 @@ const SideNav = () => {
         <Link href="/dashboard/trash">
           <Button
             variant={path.includes('/dashboard/trash') ? 'secondary' : 'link'}
-            className="flex gap-6 w-52 items-center justify-start"
+            className={clsx('flex gap-6 w-52 items-center justify-start', {
+              'font-bold': path.includes('/dashboard/trash'),
+            })}
           >
             <Trash2 />
             Trash

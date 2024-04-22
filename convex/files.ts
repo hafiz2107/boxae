@@ -1,7 +1,7 @@
 import { ConvexError, v } from 'convex/values';
 import { MutationCtx, QueryCtx, mutation, query } from './_generated/server';
 import { getIdentity, getUser } from './users';
-import { fileTypes } from './schema';
+import { fileTypes, userRoles } from './schema';
 import { Id } from './_generated/dataModel';
 
 async function hasAccessToOrg(
@@ -12,7 +12,8 @@ async function hasAccessToOrg(
   const identity = await getIdentity(ctx);
   const user = await getUser(ctx, identity.tokenIdentifier);
   const hasAccess =
-    user.orgIds.includes(orgId) || user.tokenIdentifier.includes(orgId);
+    user.orgIds.some((item) => item.orgId === orgId) ||
+    user.tokenIdentifier.includes(orgId);
 
   if (returnArray && !hasAccess) return null;
   if (!hasAccess) throw new ConvexError('User not autherised');
@@ -26,7 +27,13 @@ async function hasAccessToFile(
 ) {
   const file = await ctx.db.get(fileId);
   if (!file) return null;
-  await hasAccessToOrg(ctx, file.orgId);
+  const orgAccess = await hasAccessToOrg(ctx, file.orgId);
+
+  if (!orgAccess) {
+    return null;
+  }
+
+  return { ...orgAccess, file };
 }
 
 export const generateUploadUrl = mutation(async (ctx) => {
@@ -112,6 +119,11 @@ export const deleteFile = mutation({
     if (!hasAccess) {
       return null;
     }
+    const isAdmin =
+      hasAccess.user.orgIds.find((org) => org.orgId === hasAccess.file.orgId)
+        ?.role === 'admin';
+
+    if (!isAdmin) throw new ConvexError('You are not permitted to delete');
     return await ctx.db.delete(args.fileId);
   },
 });

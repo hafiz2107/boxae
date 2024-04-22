@@ -39,35 +39,38 @@ const FileBrowser = ({ fav }: { fav?: boolean }) => {
     }
   }, [files, isLoading, searchQuery]);
 
-  return isLoading ? (
-    <div className="flex flex-col w-full items-center justify-center">
-      <div className="h-80"></div>
-      <Loader2 className="h-24 w-24 animate-spin text-gray-600" />
-    </div>
-  ) : (
-    <div className="w-full">
-      <SignedIn>
-        {orgId && (
-          <div className="flex flex-col gap-11">
-            {showTopSection && (
-              <TopSection
-                fav={fav}
-                orgId={orgId}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-              />
-            )}
-            {favorites && (
-              <FilesListingSection
-                favorites={favorites}
-                files={files}
-                orgId={orgId}
-              />
-            )}
-          </div>
-        )}
-      </SignedIn>
-    </div>
+  return (
+    <SignedIn>
+      {isLoading ? (
+        <div className="flex flex-col w-full items-center justify-center">
+          <div className="h-80"></div>
+          <Loader2 className="h-24 w-24 animate-spin text-gray-600" />
+        </div>
+      ) : (
+        <div className="w-full">
+          {orgId && (
+            <div className="flex flex-col gap-11">
+              {showTopSection && (
+                <TopSection
+                  fav={fav}
+                  orgId={orgId}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                />
+              )}
+              {favorites && (
+                <FilesListingSection
+                  fav={fav}
+                  favorites={favorites}
+                  files={files}
+                  orgId={orgId}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </SignedIn>
   );
 };
 

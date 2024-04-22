@@ -39,6 +39,8 @@ import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useToast } from '../ui/use-toast';
 import Image from 'next/image';
+import { Protect } from '@clerk/nextjs';
+import { ConvexError } from 'convex/values';
 
 function FileCardActions({
   fileId,
@@ -63,11 +65,14 @@ function FileCardActions({
         title: 'File deleted',
         description: 'Successfully deleted file',
       });
-    } catch (err) {
+    } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError ? error.data : 'Unexpected error occurred';
+
       toast({
         variant: 'destructive',
-        title: 'Failed',
-        description: 'Failed to deleted file',
+        title: 'Failed to delete file',
+        description: errorMessage,
       });
     }
   };
@@ -117,15 +122,16 @@ function FileCardActions({
             {isFavourited && <HeartCrack size={20} />}
             {isFavourited ? 'Remove from Favorites' : 'Add to Favorites'}
           </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="flex gap-4 text-red-600 items-center justify-start"
-            onClick={() => setConfrmDialogue(true)}
-          >
-            <Trash2 size={20} />
-            Delete
-          </DropdownMenuItem>
+          <Protect role="org:admin" fallback={<></>}>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="flex gap-4 text-red-600 items-center justify-start"
+              onClick={() => setConfrmDialogue(true)}
+            >
+              <Trash2 size={20} />
+              Delete
+            </DropdownMenuItem>
+          </Protect>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

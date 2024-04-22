@@ -1,5 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { MutationCtx, QueryCtx, internalMutation } from './_generated/server';
+import { userRoles } from './schema';
 
 export async function getUser(
   ctx: QueryCtx | MutationCtx,
@@ -45,12 +46,35 @@ export const addOrgIdToUser = internalMutation({
   args: {
     tokenIdentifier: v.string(),
     orgId: v.string(),
+    role: userRoles,
   },
   async handler(ctx, args) {
     const user = await getUser(ctx, args.tokenIdentifier);
 
     await ctx.db.patch(user._id, {
-      orgIds: user.orgIds?.length ? [...user.orgIds, args.orgId] : [args.orgId],
+      orgIds: [...user.orgIds, { orgId: args.orgId, role: args.role }],
+    });
+  },
+});
+
+export const updateRoleInOrgForUser = internalMutation({
+  args: {
+    tokenIdentifier: v.string(),
+    orgId: v.string(),
+    role: userRoles,
+  },
+  async handler(ctx, args) {
+    const user = await getUser(ctx, args.tokenIdentifier);
+
+    const org = user.orgIds.find((org) => org.orgId === args.orgId);
+
+    if (!org)
+      throw new ConvexError('Expected the user to be on an organisation');
+
+    org.role = args.role;
+
+    await ctx.db.patch(user._id, {
+      orgIds: user.orgIds,
     });
   },
 });

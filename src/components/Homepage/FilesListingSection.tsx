@@ -19,6 +19,25 @@ const FilesListingSection = ({
 }) => {
   return (
     <div>
+      {fav && files && !files.length && (
+        <div className="flex flex-col gap-7 w-full items-center mt-52">
+          <Image
+            alt="No files to list"
+            width={300}
+            height={300}
+            src="/empty-favs.svg"
+          />{' '}
+          <div className="text-1xl">
+            You have no favorites, Go ahead and add one now
+          </div>
+          <div>
+            <Link href="/dashboard/files">
+              <Button>Show all files</Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {!fav && files && !files.length && (
         <div className="flex flex-col gap-7 w-full items-center mt-52">
           <Image
@@ -32,25 +51,6 @@ const FilesListingSection = ({
           </div>
           <div>
             <FileUploadButton orgId={orgId} />
-          </div>
-        </div>
-      )}
-
-      {files && fav && !files.length && (
-        <div className="flex flex-col gap-7 w-full items-center mt-52">
-          <Image
-            alt="No files to list"
-            width={300}
-            height={300}
-            src="/empty.svg"
-          />{' '}
-          <div className="text-1xl">
-            You have no favorites, Go ahead and add one now
-          </div>
-          <div>
-            <Link href="/dashboard/files">
-              <Button>Show all files</Button>
-            </Link>
           </div>
         </div>
       )}
