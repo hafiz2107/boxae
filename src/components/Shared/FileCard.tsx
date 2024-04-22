@@ -45,6 +45,12 @@ import { ConvexError } from 'convex/values';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { formatRelative } from 'date-fns';
 import { enGB } from 'date-fns/locale/en-GB';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '../ui/hover-card';
+import { Separator } from '../ui/separator';
 
 function FileCardActions({
   fileId,
@@ -182,9 +188,9 @@ const FileCard = ({
   });
 
   const typeIcons = {
-    image: <FileImage />,
-    pdf: <FileText />,
-    csv: <GanttChart />,
+    image: <FileImage className="h-10 w-8" />,
+    pdf: <FileText className="h-10 w-8" />,
+    csv: <GanttChart className="h-10 w-8" />,
   } as Record<Doc<'files'>['type'], ReactNode>;
 
   const formatRelativeLocale = {
@@ -209,9 +215,47 @@ const FileCard = ({
               <div>
                 <p className="text-sm">{file.name}</p>
                 <p className="text-xs text-gray-400">
-                  {formatRelative(new Date(file._creationTime), new Date(), {
-                    locale,
-                  })}
+                  <HoverCard>
+                    <HoverCardTrigger>
+                      <div className="flex items-center gap-2 cursor-pointer">
+                        <Avatar className="w-5 h-5">
+                          <AvatarImage src={user?.image} />
+                          <AvatarFallback>US</AvatarFallback>
+                        </Avatar>
+                        {formatRelative(
+                          new Date(file._creationTime),
+                          new Date(),
+                          {
+                            locale,
+                          }
+                        )}
+                      </div>
+                    </HoverCardTrigger>
+
+                    <HoverCardContent>
+                      <div className="flex  gap-4">
+                        <div>
+                          <Avatar className="w-14 h-14">
+                            <AvatarImage src={user?.image} />
+                            <AvatarFallback>US</AvatarFallback>
+                          </Avatar>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          <p className="font-semibold text-lg">{user?.name}</p>
+
+                          <p>
+                            {formatRelative(
+                              new Date(file._creationTime),
+                              new Date(),
+                              {
+                                locale,
+                              }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </p>
               </div>
             </div>
@@ -224,6 +268,7 @@ const FileCard = ({
             />
           </CardTitle>
         </CardHeader>
+
 
         <div className="flex flex-col gap-3">
           <CardContent className="max-h-40 min-h-40 overflow-hidden flex justify-center items-center">
@@ -239,13 +284,7 @@ const FileCard = ({
           </CardContent>
 
           <CardFooter className="flex w-full justify-between">
-            <div className="flex items-center gap-2">
-              <Avatar className="w-5 h-5">
-                <AvatarImage src={user?.image} />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <p className="text-sm text-gray-500">{user?.name}</p>
-            </div>
+            <div className="flex items-center gap-2"></div>
           </CardFooter>
         </div>
       </Card>
