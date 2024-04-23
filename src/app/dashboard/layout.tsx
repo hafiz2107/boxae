@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import SideNav from '@/components/Shared/SideNav';
+import Header from '@/components/Header/Header';
 
 export const metadata: Metadata = {
   title: 'Boxae',
@@ -12,10 +13,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="container pt-12 pl-0 pr-0">
-      <div className="flex w-full">
-        <SideNav />
-        {children}
+    <main className="">
+      <Header />
+      <div className="container pt-12 pl-0 pr-0">
+        <div className="flex w-full">
+          <SideNav />
+          {children}
+        </div>
       </div>
     </main>
   );

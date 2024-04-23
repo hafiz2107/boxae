@@ -4,6 +4,10 @@ const nextConfig = {
         remotePatterns: [{
             protocol: 'https',
             hostname: 'hushed-gazelle-134.convex.cloud'
+        },
+        {
+            protocol: 'https',
+            hostname: 'tailwindui.com'
         }]
     }
 };
