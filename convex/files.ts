@@ -8,7 +8,7 @@ import {
 } from './_generated/server';
 import { getIdentity, getUser } from './users';
 import { fileTypes, userRoles } from './schema';
-import { Id } from './_generated/dataModel';
+import { Doc, Id } from './_generated/dataModel';
 
 async function hasAccessToOrg(
   ctx: QueryCtx | MutationCtx,
@@ -67,25 +67,43 @@ export const generateUploadUrl = mutation(async (ctx) => {
 
 export const createFile = mutation({
   args: {
-    name: v.string(),
     orgId: v.string(),
-    fileId: v.id('_storage'),
-    type: fileTypes,
-    storageId: v.id('_storage'),
+    uploads: v.array(
+      v.object({
+        name: v.string(),
+        type: v.string(),
+        size: v.number(),
+        response: v.object({
+          storageId: v.id('_storage'),
+        }),
+      })
+    ),
   },
   async handler(ctx, args) {
     const hasAccess = await hasAccessToOrg(ctx, args.orgId);
 
     if (!hasAccess) throw new ConvexError("User doesn't have access");
 
-    await ctx.db.insert('files', {
-      name: args.name,
-      orgId: args.orgId,
-      fileId: args.fileId,
-      type: args.type,
-      storageId: args.storageId,
-      authorId: hasAccess.user._id,
-    });
+    const types = {
+      'image/png': 'image',
+      'application/pdf': 'pdf',
+      'text/csv': 'csv',
+      'image/jpeg': 'image',
+    } as Record<string, Doc<'files'>['type']>;
+
+    await Promise.all(
+      args.uploads.map(
+        async (upload) =>
+          await ctx.db.insert('files', {
+            name: upload.name,
+            orgId: args.orgId,
+            fileId: upload.response.storageId,
+            type: types[upload.type],
+            storageId: upload.response.storageId,
+            authorId: hasAccess.user._id,
+          })
+      )
+    );
   },
 });
 
