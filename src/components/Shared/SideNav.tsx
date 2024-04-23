@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { FileIcon, Heart, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
+import { Progress } from '../ui/progress';
 
 const SideNav = () => {
   const path = usePathname();

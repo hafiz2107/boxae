@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Doc } from '../../../convex/_generated/dataModel';
 import GridView from './GridView';
 import TableView from './TableView';
@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Progress } from '../ui/progress';
+import { FileUploadProgressContext } from '@/Providers/FileUploadProgressProvider';
 
 const FilesListingSection = ({
   view,
@@ -34,6 +36,8 @@ const FilesListingSection = ({
   files: (Doc<'files'> & { url: string | null; isFavorited: boolean })[];
   orgId: string;
 }) => {
+  const { uploadProgress } = useContext(FileUploadProgressContext);
+
   return (
     <div>
       {files && !files.length ? (
@@ -46,7 +50,7 @@ const FilesListingSection = ({
       ) : (
         <Tabs defaultValue={view}>
           <div className="flex justify-between items-center">
-            <div>
+            <div className="flex items-center justify-center gap-8">
               <TabsList className="mb-8">
                 <TabsTrigger
                   value="grid"
@@ -66,6 +70,16 @@ const FilesListingSection = ({
                   Table view
                 </TabsTrigger>
               </TabsList>
+
+              {Boolean(uploadProgress) && (
+                <div className="flex flex-col gap-1">
+                  <p className="animate-pulse text-sm">Uploading file</p>
+                  <Progress
+                    value={uploadProgress}
+                    className="w-40 mb-8 animate-pulse"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="mb-8">

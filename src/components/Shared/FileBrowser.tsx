@@ -23,6 +23,7 @@ const FileBrowser = ({
   const [fileTypeFilter, setFileTypeFilter] = useState<
     'all' | 'image' | 'csv' | 'pdf'
   >('all');
+
   const organization = useOrganization();
   const user = useUser();
 
@@ -49,8 +50,6 @@ const FileBrowser = ({
       : 'skip'
   )!;
 
-  // const [showTopSection, setShowTopSection] = useState(false);
-
   const isLoading = files === undefined;
 
   const modifiedFiles =
@@ -60,12 +59,6 @@ const FileBrowser = ({
         isFavorited: (favorites ?? []).some((fav) => fav.fileId === file._id),
       }))) ??
     [];
-
-  // useEffect(() => {
-  //   if (!isLoading) {
-  //     setShowTopSection(searchQuery ? true : Boolean(files && files.length));
-  //   }
-  // }, [files, isLoading, searchQuery]);
 
   return (
     <SignedIn>

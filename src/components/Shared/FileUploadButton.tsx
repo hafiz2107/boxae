@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useContext, useState } from 'react';
 
 import { Button } from '../ui/button';
 import { useMutation } from 'convex/react';
@@ -13,20 +13,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
-import { Doc, Id } from '../../../convex/_generated/dataModel';
+import { Id } from '../../../convex/_generated/dataModel';
 
 import { UploadDropzone, UploadFileResponse } from '@xixixao/uploadstuff/react';
 import '@xixixao/uploadstuff/react/styles.css';
+import { FileUploadProgressContext } from '@/Providers/FileUploadProgressProvider';
 
 const FileUploadButton = ({ orgId }: { orgId: string }) => {
   const [isFileUploadDialogueOpen, setIsFileUploadDialogueOpen] =
     useState(false);
+
+  const { setUploadProgress } = useContext(FileUploadProgressContext);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const createFile = useMutation(api.files.createFile);
   const { toast } = useToast();
 
   const saveAfterUpload = async (uploaded: UploadFileResponse[]) => {
-    setIsFileUploadDialogueOpen(false);
     await createFile({
       orgId: orgId,
       uploads: uploaded as unknown as {
@@ -42,6 +44,8 @@ const FileUploadButton = ({ orgId }: { orgId: string }) => {
       title: 'Success',
       description: 'Now everyone can view your file',
     });
+
+    setUploadProgress(0);
   };
 
   return (
@@ -67,8 +71,9 @@ const FileUploadButton = ({ orgId }: { orgId: string }) => {
                   'image/*': ['.png'],
                   'text/csv': ['.csv'],
                 }}
-                onUploadComplete={saveAfterUpload}
                 multiple
+                onUploadBegin={() => setIsFileUploadDialogueOpen(false)}
+                onUploadComplete={saveAfterUpload}
                 onUploadError={() => {
                   setIsFileUploadDialogueOpen(false);
                   toast({
@@ -79,7 +84,7 @@ const FileUploadButton = ({ orgId }: { orgId: string }) => {
                   });
                 }}
                 onUploadProgress={(progress) => {
-                  console.log('Upload prgress -> ', progress);
+                  setUploadProgress(progress);
                 }}
               />
             </DialogDescription>

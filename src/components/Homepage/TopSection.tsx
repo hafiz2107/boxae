@@ -2,6 +2,7 @@ import React, { Dispatch } from 'react';
 
 import FileUploadButton from '@/components/Shared/FileUploadButton';
 import SearchBar from '../Shared/SearchBar';
+import { Progress } from '../ui/progress';
 
 const TopSection = ({
   orgId,
@@ -23,6 +24,7 @@ const TopSection = ({
       <h1 className="text-4xl font-bold">
         {favoriteOnly ? 'Favorites' : deletedOnly ? 'Trash' : 'Your Files'}
       </h1>
+
       {!isEmpty && (
         <>
           <SearchBar

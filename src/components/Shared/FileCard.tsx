@@ -119,7 +119,17 @@ const FileCard = ({
         <div className="flex flex-col gap-3">
           <CardContent className="max-h-40 min-h-40 overflow-hidden flex justify-center items-center">
             {file.url && file.type === 'image' && (
-              <Image alt={'Preview'} height={100} width={200} src={file.url} />
+              <Image
+                data-loaded="false"
+                onLoad={(event) => {
+                  event.currentTarget.setAttribute('data-loaded', 'true');
+                }}
+                className="data-[loaded=false]:animate-pulse data-[loaded=false]:bg-gray-100/10"
+                alt={'Preview'}
+                height={100}
+                width={200}
+                src={file.url}
+              />
             )}
             {file.url && file.type === 'csv' && (
               <GanttChart className="w-20 h-20" />
